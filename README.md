@@ -1,6 +1,6 @@
 # Jacob Paul Simpson
 
-Academic website published at https://jac0b03.github.io/ using GitHub Pages.
+Academic website published at https://jacobpaulsimpson.github.io/ using GitHub Pages.
 
 This repository contains plain HTML, CSS and JavaScript, together with the public slides, poster and venue artwork. GitHub Pages serves the `main` branch from the repository root.
 
