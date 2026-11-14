@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jacobpaulsimpson.github.io/sitemap.xml
