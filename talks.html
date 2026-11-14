@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Presentations — Jacob Paul Simpson</title>
+  <meta name="description" content="Presentations by Jacob Paul Simpson.">
+  <meta name="author" content="Jacob Paul Simpson">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css">
+  </noscript>
+  <link rel="stylesheet" href="style.css?v=e458c6027c">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html">Jacob Paul Simpson</a>
+      <nav>
+        <a href="index.html">About</a>
+        <a href="publications.html">Publications</a>
+        <a href="talks.html" class="active">Presentations</a>
+        
+        
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="page-head">
+      <h1>Presentations</h1>
+    </div>
+    <div class="pub-toolbar">
+      <label class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="pub-search" type="search" placeholder="Search..." aria-label="Search presentations">
+      </label>
+      <div class="year-select">
+        <span class="value" id="pub-year-label">All years</span>
+        <span class="arrow">
+          <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          <select id="pub-year" aria-label="Filter by year"><option value="">All years</option></select>
+        </span>
+      </div>
+      <div class="type-filter" role="group" aria-label="Filter by type">
+        <button data-type="" class="on">All</button>
+        <button data-type="invited">Invited talk</button>
+        <button data-type="contributed">Contributed talk</button>
+        <button data-type="poster">Poster</button>
+      </div>
+    </div>
+    <div id="talk-list"></div>
+    <p id="pub-empty" class="muted" hidden>No presentations match your filters.</p>
+  </main>
+
+  <footer class="wrap footer">
+    <span>&copy; <span class="year-now"></span> Jacob Paul Simpson</span>
+  </footer>
+
+  <script src="talks.js?v=a7b1e884d2" defer></script>
+  <script src="main.js?v=3654d2473d" defer></script>
+</body>
+</html>

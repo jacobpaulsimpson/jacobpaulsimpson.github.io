@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jacob Paul Simpson</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <style>
+    :root { --bg: #121417; --surface: #1a1d21; --text: #e6e8ea; --muted: #9aa3ad; --border: #2a2f35; --accent: #e0839d; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 "Inter", system-ui, sans-serif; }
+    .bar {
+      position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 16px;
+      height: 52px; padding: 0 16px; background: color-mix(in srgb, var(--bg) 90%, transparent);
+      backdrop-filter: blur(8px); border-bottom: 1px solid var(--border);
+    }
+    .bar .title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+    .bar .count { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+    .bar a {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text); text-decoration: none;
+      padding: 5px 11px; border: 1px solid var(--border); border-radius: 6px; white-space: nowrap;
+    }
+    .bar a:hover { border-color: var(--accent); color: var(--accent); }
+    #pages { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; display: grid; gap: 18px; }
+    canvas { display: block; width: 100%; height: auto; background: #fff; border-radius: 4px; box-shadow: 0 2px 14px rgba(0,0,0,.45); }
+    .msg { color: var(--muted); text-align: center; padding-top: 30vh; }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <span class="title" id="title"></span>
+    <span class="count" id="count"></span>
+    <a id="download" download><i class="fa-solid fa-download"></i> Download</a>
+  </div>
+  <div id="pages"><p class="msg">Loading…</p></div>
+
+  <script>
+    // pdf.html?file=files/<name>.pdf&title=<tab title>
+    // Pages are drawn with PDF.js at the screen's full pixel density, so text stays sharp.
+    const q = new URLSearchParams(location.search);
+    const file = q.get("file") || "";
+    const pagesEl = document.getElementById("pages");
+
+    if (!/^files\/[\w.-]+\.pdf$/.test(file)) {
+      pagesEl.innerHTML = '<p class="msg">Document not found.</p>';
+      document.querySelector(".bar").remove();
+    } else if (location.protocol === "file:") {
+      location.replace(file);
+    } else {
+      const title = q.get("title") || file;
+      document.title = title;
+      document.getElementById("title").textContent = title;
+      document.getElementById("download").href = file;
+
+      let pdf, generation = 0, observer;
+
+      // Lay out every page at its correct size first, then draw each one only when it
+      // scrolls near the viewport, so long slide decks appear instantly.
+      async function layout() {
+        const gen = ++generation;
+        if (observer) observer.disconnect();
+        const first = await pdf.getPage(1);
+        const base = first.getViewport({ scale: 1 });
+        const holders = [];
+        for (let n = 1; n <= pdf.numPages; n++) {
+          const c = document.createElement("canvas");
+          c.dataset.page = n;
+          c.setAttribute("role", "img");
+          c.setAttribute("aria-label", `Page ${n} of ${pdf.numPages}`);
+          c.style.aspectRatio = `${base.width} / ${base.height}`;
+          holders.push(c);
+        }
+        if (gen !== generation) return;
+        pagesEl.replaceChildren(...holders);
+        observer = new IntersectionObserver(entries => {
+          entries.forEach(e => {
+            if (e.isIntersecting && !e.target.dataset.done) {
+              e.target.dataset.done = "1";
+              draw(e.target, gen).catch(() => {
+                if (gen === generation) location.replace(file);
+              });
+            }
+          });
+        }, { rootMargin: "600px 0px" });
+        holders.forEach(c => observer.observe(c));
+      }
+
+      async function draw(canvas, gen) {
+        const page = await pdf.getPage(+canvas.dataset.page);
+        const base = page.getViewport({ scale: 1 });
+        canvas.style.aspectRatio = `${base.width} / ${base.height}`;
+        const dpr = Math.min(window.devicePixelRatio || 1, 3);
+        // Draw at the screen's pixel density (at least 2x) so text stays crisp.
+        const vp = page.getViewport({ scale: (canvas.clientWidth / base.width) * Math.max(dpr, 2) });
+        const off = document.createElement("canvas");
+        off.width = Math.floor(vp.width);
+        off.height = Math.floor(vp.height);
+        await page.render({ canvasContext: off.getContext("2d"), viewport: vp }).promise;
+        if (gen !== generation) return;
+        canvas.width = off.width;
+        canvas.height = off.height;
+        canvas.getContext("2d").drawImage(off, 0, 0);
+      }
+
+      const viewer = document.createElement("script");
+      viewer.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      viewer.onerror = () => location.replace(file);
+      viewer.onload = async () => {
+        try {
+          pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+          pdf = await pdfjsLib.getDocument(file).promise;
+          document.getElementById("count").textContent =
+            `${pdf.numPages} page${pdf.numPages === 1 ? "" : "s"}`;
+          await layout();
+        } catch {
+          location.replace(file);
+        }
+      };
+      document.head.appendChild(viewer);
+
+      let t;
+      addEventListener("resize", () => {
+        clearTimeout(t);
+        t = setTimeout(() => {
+          if (pdf) layout().catch(() => location.replace(file));
+        }, 250);
+      });
+    }
+  </script>
+</body>
+</html>
